@@ -19,8 +19,12 @@ Development kit(JDK) desde:https://www.oracle.com/lad/java/technologies/javase-d
 2. # Descargar el codigo de desde Github
   Cuando instale Apache Neatbeeans, se direge donde dice team seleciona donde dice git 
   ahi se abrira un ventana donde ingresara el link del repositorio
+  
+  
   ![team](https://user-images.githubusercontent.com/37676866/120134662-ddc19b80-c18b-11eb-992c-33365b8b9c91.png)
+  
 ![clone](https://user-images.githubusercontent.com/37676866/120134673-e1edb900-c18b-11eb-8ba3-7a999a6cdebd.png)
+
 
 3. #Obtener el link del repositorio
   Para conseguir el link del repositorio es ingresar al link delnuestro repositorio, donde esta el boton verde que dice code
