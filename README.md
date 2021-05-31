@@ -1,7 +1,7 @@
 # B72933_ProyectoRedes_Victor
 
 La idea del proyecto es crear un cliente-servidor para enviar
-imagenes al servidor en partes para luego volver a retaurar la imagen
+imagenes al servidor en partes para luego volver a restaurar la imagen
 
 Para poder ejecutar el proyecto que se ubica en un repositorio se 
 va ocupar un IDE para ejecutar el proyecto llamado Apache Neatbeans
