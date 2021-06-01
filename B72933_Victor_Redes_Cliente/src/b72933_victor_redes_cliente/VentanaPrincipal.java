@@ -116,6 +116,13 @@ public class VentanaPrincipal extends JFrame implements ActionListener {
             file1.delete();
         }
     }
+    
+     public String tipo(String filename1){
+        String aux = "";
+        aux = filename1.replaceAll("^.*\\.(.*)$","$1");
+         System.out.println(aux);
+        return aux;
+    }
 
     private void image(String file) throws IOException {
         File fileaux = new File(file);
@@ -149,7 +156,7 @@ public class VentanaPrincipal extends JFrame implements ActionListener {
         // output thumbnail
         for (int i = 0; i < imgs.length; i++) {
             File file1 = new File("src/img/" + i + "." + split[1]);
-            ImageIO.write(imgs[i], "jpg", file1);
+            ImageIO.write(imgs[i], tipo(file), file1);
         }
     }
 

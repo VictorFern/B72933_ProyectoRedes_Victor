@@ -130,7 +130,7 @@ public class HiloServidor extends Thread {
     public void image() throws IOException {
         this.filename = this.receive.readUTF();
         String filename1 = this.filename;
- 
+
         int row = 4;
         int col = 4;
         int tamano = row * col;
@@ -159,7 +159,7 @@ public class HiloServidor extends Thread {
                 num++;
             }
         }       // Output the stitched image
-        ImageIO.write(finalImg, "jpg", new File("Usuarios/" + this.rutaCarpeta + "/" + "/"+name(filename1)));
+        ImageIO.write(finalImg, tipo(filename1), new File("Usuarios/" + this.rutaCarpeta + "/" + "/" + name(filename1)));
         for (int i = 0; i <= 15; i++) {
             File file1 = new File("Usuarios/" + this.rutaCarpeta + "/" + i + "." + split[1]);
             file1.delete();
@@ -168,12 +168,19 @@ public class HiloServidor extends Thread {
         this.filename = "";
         System.out.println("Acaba de recibir");
     }
-    
-    public String name(String filename1){
+
+    public String name(String filename1) {
         String aux = filename1.replaceAll("\\\\", " ");
         String[] temp = aux.split(" ");
         String name = temp[temp.length - 1];
         return name;
+    }
+
+    public String tipo(String filename1) {
+        String aux = "";
+        aux = filename1.replaceAll("^.*\\.(.*)$", "$1");
+        System.out.println(aux);
+        return aux;
     }
 
     public void listarArchivos() throws IOException {
