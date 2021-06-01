@@ -6,6 +6,7 @@
 package b72933_victor_redes_servidor;
 
 import Utility.Utility;
+import java.awt.image.BufferedImage;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -16,6 +17,7 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import javax.imageio.ImageIO;
 import org.jdom.JDOMException;
 
 /**
@@ -72,7 +74,12 @@ public class HiloServidor extends Thread {
                     enviarArchivo();
                 } else if (this.accion.equalsIgnoreCase(Utility.AVISOENVIO)) {
                     recibirArchivo();
+
+                } else if (this.accion.equalsIgnoreCase(Utility.AVISOENVIO2)) {
+                    image();
+
                 }
+
             } while (this.execute);
         } catch (Exception e) {
             System.err.println(e);
@@ -89,7 +96,7 @@ public class HiloServidor extends Thread {
             byteArray = Files.readAllBytes(Paths.get("Usuarios" + "//" + this.rutaCarpeta + "//" + this.filename));
             this.send.write(byteArray);
             this.send.flush();
-      
+
             this.accion = "";
             this.filename = "";
         } else {
@@ -103,7 +110,7 @@ public class HiloServidor extends Thread {
         byte readbytes[] = new byte[1024];
         InputStream in = this.socket.getInputStream();
 
-        try (OutputStream file = Files.newOutputStream(Paths.get("Usuarios" + "//" + this.rutaCarpeta + "//" + this.filename))) {
+        try ( OutputStream file = Files.newOutputStream(Paths.get("Usuarios" + "//" + this.rutaCarpeta + "//" + this.filename))) {
             for (int read = -1; (read = in.read(readbytes)) >= 0;) {
                 file.write(readbytes, 0, read);
                 if (read < 1024) {
@@ -112,12 +119,61 @@ public class HiloServidor extends Thread {
             }
             file.flush();
         }
-        
+
         this.receive = new DataInputStream(this.socket.getInputStream());
         in.close();
         this.accion = "";
-        this.filename="";
+        this.filename = "";
         System.out.println("Acaba de recibir");
+    }
+
+    public void image() throws IOException {
+        this.filename = this.receive.readUTF();
+        String filename1 = this.filename;
+ 
+        int row = 4;
+        int col = 4;
+        int tamano = row * col;
+        int acho, altura;
+        int type;
+        // Read the thumbnail
+        File[] imgFiles = new File[tamano];
+        String[] split = filename1.split("\\.");
+        for (int i = 0; i < tamano; i++) {
+            imgFiles[i] = new File("Usuarios/" + this.rutaCarpeta + "/" + i + "." + split[1]);
+        }       // Create a BufferedImage
+        BufferedImage[] buffImages = new BufferedImage[tamano];
+        for (int i = 0; i < tamano; i++) {
+            buffImages[i] = ImageIO.read(imgFiles[i]);
+        }       // Get type
+        type = buffImages[0].getType();
+        acho = buffImages[0].getWidth();
+        altura = buffImages[0].getHeight();
+        // Set the size and type of the stitched map
+        BufferedImage finalImg = new BufferedImage(acho * col, altura * row, type);
+        // Write image content
+        int num = 0;
+        for (int i = 0; i < row; i++) {
+            for (int j = 0; j < col; j++) {
+                finalImg.createGraphics().drawImage(buffImages[num], acho * j, altura * i, null);
+                num++;
+            }
+        }       // Output the stitched image
+        ImageIO.write(finalImg, "jpg", new File("Usuarios/" + this.rutaCarpeta + "/" + "/"+name(filename1)));
+        for (int i = 0; i <= 15; i++) {
+            File file1 = new File("Usuarios/" + this.rutaCarpeta + "/" + i + "." + split[1]);
+            file1.delete();
+        }
+        this.accion = "";
+        this.filename = "";
+        System.out.println("Acaba de recibir");
+    }
+    
+    public String name(String filename1){
+        String aux = filename1.replaceAll("\\\\", " ");
+        String[] temp = aux.split(" ");
+        String name = temp[temp.length - 1];
+        return name;
     }
 
     public void listarArchivos() throws IOException {
@@ -127,11 +183,11 @@ public class HiloServidor extends Thread {
             System.out.println("No hay elementos dentro de la carpeta actual");
             this.send.writeUTF(Utility.DENEGADO);
         } else {
-            this.send.writeUTF(""+listado.length);
+            this.send.writeUTF("" + listado.length);
             for (int i = 0; i < listado.length; i++) {
                 this.send.writeUTF(listado[i]);
             }
         }
-        
+
     }
 }
