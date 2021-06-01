@@ -21,6 +21,7 @@ import java.util.logging.Logger;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import org.jdom.JDOMException;
@@ -44,36 +45,36 @@ public class Server extends JFrame implements Runnable, ActionListener {
     public Server() throws JDOMException, IOException {
         super("Server");
         this.setLayout(null);
-        this.setSize(300, 300);
+        this.setSize(500, 300);
         init();
         this.hilo = new Thread(this);
         this.hilo.start();
     }
 
     public void init() throws JDOMException, IOException {
-        this.labelContrasena = new JLabel("Nombre cliente");
-        this.labelContrasena.setBounds(10, 10, 150, 30);
-        this.add(labelContrasena);
-
-        this.labelCliente = new JLabel("Contraseña cliente ");
+        this.labelCliente = new JLabel("Nombre cliente");
         this.labelCliente.setBounds(10, 70, 150, 30);
         this.add(labelCliente);
 
+        this.labelContrasena = new JLabel("Contraseña cliente ");
+        this.labelContrasena.setBounds(220, 70, 150, 30);
+        this.add(labelContrasena);
+
         this.textContrasena = new JPasswordField();
-        this.textContrasena.setBounds(150, 70, 100, 30);
+        this.textContrasena.setBounds(330, 70, 100, 30);
         this.add(textContrasena);
 
         this.textCliente = new JTextField();
-        this.textCliente.setBounds(150, 10, 100, 30);
+        this.textCliente.setBounds(100, 70, 100, 30);
         this.add(textCliente);
 
         this.buttonRegistrar = new JButton("Registrar Cliente");
-        this.buttonRegistrar.setBounds(50, 120, 150, 30);
+        this.buttonRegistrar.setBounds(160, 120, 150, 30);
         this.buttonRegistrar.addActionListener(this);
         this.add(buttonRegistrar);
 
         this.labelIpServidor = new JLabel();
-        this.labelIpServidor.setBounds(50, 150, 500, 100);
+        this.labelIpServidor.setBounds(170, 150, 500, 100);
         this.add(this.labelIpServidor);
     }
 
@@ -107,21 +108,22 @@ public class Server extends JFrame implements Runnable, ActionListener {
                 Connection conectar = conect.getConexion();
                 Statement pst = conectar.createStatement();
                 ResultSet rs = pst.executeQuery("call sp_obtener_usuario('" + this.textCliente.getText() + "')");
-                String i = "";
+                String name = "";
                 while (rs.next()) {
 
-                    i = rs.getString("nombre");
+                    name = rs.getString("nombre");
 
-                    System.out.println("nombre = " + i + " contrasena");
+                    System.out.println("nombre = " + name + " contrasena");
                 }
 
-                if (i.equals("")) {
+                if (name.equals("")) {
                     pst.executeQuery("call sp_insertar_usuario('" + this.textCliente.getText() + "','" 
                             + this.textContrasena.getText() + "')");
                     File directorio = new File("Usuarios\\" + this.textCliente.getText());
                     if (!directorio.exists()) {
                         if (directorio.mkdirs()) {
                             System.out.println("Directorio creado");
+                            JOptionPane.showMessageDialog(null, "Usuario creado");
                         } else {
                             System.out.println("Error al crear directorio");
                         }

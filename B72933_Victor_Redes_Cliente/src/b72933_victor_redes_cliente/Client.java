@@ -28,15 +28,15 @@ import org.jdom.JDOMException;
 
 public class Client extends JFrame implements ActionListener {
 
-    private JLabel labelIp;
-    private JLabel labelId;
-    private JLabel labelPassword;
+    private JLabel jllIp;
+    private JLabel jlCliente;
+    private JLabel jlPassword;
 
-    private JTextField textIp;
-    private JTextField textId;
-    private JPasswordField textPassword;
+    private JTextField jtfIp;
+    private JTextField jtfNombreCliente;
+    private JPasswordField jpfPassword;
 
-    private JButton botonIniciar;
+    private JButton jbtnIniciar;
 
     private HiloClient cliente;
 
@@ -44,54 +44,54 @@ public class Client extends JFrame implements ActionListener {
         super("Client");
 
         this.setLayout(null);
-        this.setSize(250, 250);
+        this.setSize(600, 250);
 
         init();
 
     }
 
     private void init() throws JDOMException, IOException {
-        this.labelIp = new JLabel("Ip:");
-        this.labelIp.setBounds(10, 10, 75, 30);
-        this.add(this.labelIp);
+        this.jllIp = new JLabel("Ip:");
+        this.jllIp.setBounds(10, 60, 75, 30);
+        this.add(this.jllIp);
 
-        this.labelId = new JLabel("Nombre:");
-        this.labelId.setBounds(10, 60, 75, 30);
-        this.add(this.labelId);
+        this.jlCliente = new JLabel("Nombre:");
+        this.jlCliente.setBounds(150, 60, 75, 30);
+        this.add(this.jlCliente);
 
-        this.labelPassword = new JLabel("Contraseña");
-        this.labelPassword.setBounds(10, 110, 100, 30);
-        this.add(this.labelPassword);
+        this.jlPassword = new JLabel("Contraseña:");
+        this.jlPassword.setBounds(330, 60, 100, 30);
+        this.add(this.jlPassword);
 
-        this.textIp = new JTextField();
-        this.textIp.setBounds(100, 10, 100, 30);
-        this.add(this.textIp);
+        this.jtfIp = new JTextField();
+        this.jtfIp.setBounds(30, 60, 100, 30);
+        this.add(this.jtfIp);
 
-        this.textId = new JTextField();
-        this.textId.setBounds(100, 60, 100, 30);
-        this.add(this.textId);
+        this.jtfNombreCliente = new JTextField();
+        this.jtfNombreCliente.setBounds(205, 60, 100, 30);
+        this.add(this.jtfNombreCliente);
 
-        this.textPassword = new JPasswordField();
-        this.textPassword.setBounds(100, 110, 100, 30);
-        this.add(this.textPassword);
+        this.jpfPassword = new JPasswordField();
+        this.jpfPassword.setBounds(405, 60, 100, 30);
+        this.add(this.jpfPassword);
 
-        this.botonIniciar = new JButton("Iniciar");
-        this.botonIniciar.setBounds(50, 150, 100, 30);
-        this.botonIniciar.addActionListener(this);
-        this.add(this.botonIniciar);
+        this.jbtnIniciar = new JButton("Iniciar");
+        this.jbtnIniciar.setBounds(230, 150, 100, 30);
+        this.jbtnIniciar.addActionListener(this);
+        this.add(this.jbtnIniciar);
     }
 
     @Override
     public void actionPerformed(ActionEvent ae) {
 
-        if (ae.getSource() == this.botonIniciar) {
+        if (ae.getSource() == this.jbtnIniciar) {
 
             
             try {
                 Conexion conect = new Conexion();
                 Connection conectar = conect.getConexion();
                 Statement pst = conectar.createStatement();
-                ResultSet rs = pst.executeQuery("call sp_obtener_usuario('" + this.textId.getText()+"')");
+                ResultSet rs = pst.executeQuery("call sp_obtener_usuario_all('" + this.jtfNombreCliente.getText()+ "','"+this.jpfPassword.getText()+"')");
                 String i = "";
                 while (rs.next()) {
 
@@ -100,10 +100,10 @@ public class Client extends JFrame implements ActionListener {
                     System.out.println("nombre = " + i);
                 }
 
-                if (i.equals(this.textId.getText())) {
+                if (i.equals(this.jtfNombreCliente.getText())) {
                     this.dispose();
 
-                    this.cliente = new HiloClient(this.textIp.getText().trim(),this.textId.getText().trim());
+                    this.cliente = new HiloClient(this.jtfIp.getText().trim(),this.jtfNombreCliente.getText().trim());
                     
                     VentanaPrincipal ventana = new VentanaPrincipal(this.cliente);
                     ventana.setVisible(true);
@@ -112,7 +112,10 @@ public class Client extends JFrame implements ActionListener {
                     ventana.setResizable(false);
                     System.out.println("exito");
                 } else {
-                    JOptionPane.showMessageDialog(null, "Datos ingresados incorrecto");
+                    JOptionPane.showMessageDialog(null, "Datos incorrecto");
+                    this.jtfIp.setText("");
+                    this.jtfNombreCliente.setText("");
+                    this.jpfPassword.setText("");
                 }
                 conectar.close();
             } catch (SQLException | IOException ex) {

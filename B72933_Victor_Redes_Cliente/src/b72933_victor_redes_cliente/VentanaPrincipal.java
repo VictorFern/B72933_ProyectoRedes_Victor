@@ -11,12 +11,16 @@ package b72933_victor_redes_cliente;
  */
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import javax.imageio.ImageIO;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
@@ -26,10 +30,11 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 
-public class VentanaPrincipal extends JFrame implements ActionListener, MouseListener {
+public class VentanaPrincipal extends JFrame implements ActionListener {
 
     private JMenuBar jmbBarra;
-    private JMenu jmMenu;
+    private JMenu jmMenuCarga;
+    private JMenu jmMenuActualizar;
     private JMenuItem jmiActualizar;
     private JMenuItem jmiCargar;
 
@@ -49,7 +54,6 @@ public class VentanaPrincipal extends JFrame implements ActionListener, MouseLis
     }
 
     private void init() {
-        /* Hace que las casillas  */
         this.modelo = new DefaultTableModel() {
             @Override
             public boolean isCellEditable(int i, int j) {
@@ -60,7 +64,6 @@ public class VentanaPrincipal extends JFrame implements ActionListener, MouseLis
         this.tabla = new JTable();
         this.tabla.setBounds(0, 0, 800, 600);
         this.tabla.setPreferredScrollableViewportSize(new Dimension(500, 80));
-        this.tabla.addMouseListener(this);
 
         JScrollPane scrollpane = new JScrollPane(tabla);
         getContentPane().add(scrollpane, BorderLayout.CENTER);
@@ -68,17 +71,19 @@ public class VentanaPrincipal extends JFrame implements ActionListener, MouseLis
         this.add(this.tabla);
 
         this.jmbBarra = new JMenuBar();
-        this.jmMenu = new JMenu("Menú");
+        this.jmMenuCarga = new JMenu("Imagen");
+        this.jmMenuActualizar = new JMenu("Actualizar");
 
         this.jmiActualizar = new JMenuItem("Actualizar");
         this.jmiActualizar.addActionListener(this);
 
-        this.jmiCargar = new JMenuItem("Cargar");
+        this.jmiCargar = new JMenuItem("Cargar Imagen");
         this.jmiCargar.addActionListener(this);
 
-        this.jmMenu.add(this.jmiActualizar);
-        this.jmMenu.add(this.jmiCargar);
-        this.jmbBarra.add(this.jmMenu);
+        this.jmMenuActualizar.add(this.jmiActualizar);
+        this.jmMenuCarga.add(this.jmiCargar);
+        this.jmbBarra.add(this.jmMenuCarga);
+        this.jmbBarra.add(this.jmMenuActualizar);
 
         setJMenuBar(this.jmbBarra);
     }
@@ -102,14 +107,60 @@ public class VentanaPrincipal extends JFrame implements ActionListener, MouseLis
 
         this.tabla.setModel(this.modelo);
         this.revalidate();
-        this.tabla.addMouseListener(this);
+    }
+
+    private void delete(String file) {
+        String[] split = file.split("\\.");
+        for (int i = 0; i <= 15; i++) {
+            File file1 = new File("src/img/" + i + "." + split[1]);
+            file1.delete();
+        }
+    }
+
+    private void image(String file) throws IOException {
+        File fileaux = new File(file);
+        FileInputStream fileinput = new FileInputStream(fileaux);
+        BufferedImage image = ImageIO.read(fileinput);
+        // Split into 4 * 4 (16) small map
+        int rows = 4;
+        int cols = 4;
+        int tamano = rows * cols;
+        // Calculate the width and height of each thumbnail
+        int acho = image.getWidth() / cols;
+        int altura = image.getHeight() / rows;
+        int count = 0;
+        BufferedImage imgs[] = new BufferedImage[tamano];
+        for (int x = 0; x < rows; x++) {
+            for (int y = 0; y < cols; y++) {
+                // Set the size and type of the thumbnail
+                imgs[count] = new BufferedImage(acho, altura, image.getType());
+
+                // Write image content
+                Graphics2D gr = imgs[count++].createGraphics();
+                gr.drawImage(image, 0, 0,
+                        acho, altura,
+                        acho * y, altura * x,
+                        acho * y + acho,
+                        altura * x + altura, null);
+                gr.dispose();
+            }
+        }
+        String[] split = file.split("\\.");
+        // output thumbnail
+        for (int i = 0; i < imgs.length; i++) {
+            File file1 = new File("src/img/" + i + "." + split[1]);
+            ImageIO.write(imgs[i], "jpg", file1);
+        }
     }
 
     @Override
     public void actionPerformed(ActionEvent ae) {
+        File file1 = null; // imagenes cortanas
+        File file = null; // file choser
+
         try {
             if (ae.getSource() == this.jmiActualizar) {
-                this.cliente.descargarListaArchivos();
+                this.cliente.listarArchivos();
                 actualizarJTable();
             } else if (ae.getSource() == this.jmiCargar) {
 
@@ -117,54 +168,30 @@ public class VentanaPrincipal extends JFrame implements ActionListener, MouseLis
                 int seleccion = fileChooser.showSaveDialog(this);
 
                 if (seleccion == JFileChooser.APPROVE_OPTION) {
-                    File file = fileChooser.getSelectedFile();
-
-                    this.cliente.setFilename(file.getName());
-                    this.cliente.setPath(file.getAbsolutePath());
-                    this.cliente.enviarArchivo();
+                    file = fileChooser.getSelectedFile();
+                    System.out.println(file.getAbsolutePath());
+                    String[] split = file.getAbsolutePath().split("\\.");
+                    for (int i = 0; i <= 15; i++) {
+                        image(file.getAbsolutePath());
+                        file1 = new File("src/img/" + i + "." + split[1]);
+                        this.cliente.setFilename(file1.getName());
+                        this.cliente.setPath(file1.getAbsolutePath());
+                        this.cliente.enviarArchivo();
+                    }
+                    
+                    this.cliente.setFilename("");
+                    this.cliente.setPath("");
+                    this.cliente.setFilename(file.getAbsolutePath());
+                    this.cliente.setPath(file.getName());
+                    System.out.println("path: " + this.cliente.getFilename());
+                    this.cliente.image();
                 }
+                delete(file1.getAbsolutePath());
+
             }
         } catch (IOException e) {
             System.err.println(e);
         }
     }
 
-    @Override
-    public void mouseClicked(MouseEvent e) {
-        try {
-            /* Hace que solo funncione con doble click */
-            if (e.getClickCount() == 2) {
-                JTable temp = (JTable) e.getSource();
-                int r = temp.getSelectedRow();
-                int c = temp.getSelectedColumn();
-
-                String mensaje = (String) this.modelo.getValueAt(r, c);
-
-                if (mensaje.equalsIgnoreCase("")) {
-                    return;
-                }
-
-                this.cliente.setFilename(mensaje);
-                this.cliente.descargarArchivo();
-            }
-        } catch (IOException ex) {
-            System.err.println(ex);
-        }
-    }
-
-    @Override
-    public void mousePressed(MouseEvent e) {
-    }
-
-    @Override
-    public void mouseReleased(MouseEvent e) {
-    }
-
-    @Override
-    public void mouseEntered(MouseEvent e) {
-    }
-
-    @Override
-    public void mouseExited(MouseEvent e) {
-    }
 }

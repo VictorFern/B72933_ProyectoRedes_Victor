@@ -50,10 +50,10 @@ public class HiloClient {
         this.receive = new DataInputStream(this.socket.getInputStream());
     }
 
-    public void descargarListaArchivos() throws IOException {
+    public void listarArchivos() throws IOException {
         identificarse();
         this.send.writeUTF(Utility.AVISOLISTAR);
-        
+
         String mensaje = this.receive.readUTF();
 
         if (mensaje.equalsIgnoreCase(Utility.DENEGADO)) {
@@ -98,6 +98,19 @@ public class HiloClient {
         }
     }
 
+    public void image() throws FileNotFoundException, IOException {
+        if (!this.filename.equalsIgnoreCase("")) {
+            this.send.writeUTF(Utility.AVISOENVIO2);
+            this.send.writeUTF(this.filename);
+            this.send.close();
+
+            this.socket = new Socket(this.address, Utility.SOCKETNUMBER);
+            this.send = new DataOutputStream(this.socket.getOutputStream());
+            this.receive = new DataInputStream(this.socket.getInputStream());
+             this.filename = "";
+        }
+    }
+
     public void descargarArchivo() throws IOException {
         identificarse();
         this.send.writeUTF(Utility.AVISODESCARGA);
@@ -106,7 +119,7 @@ public class HiloClient {
         if (mensaje.equalsIgnoreCase(Utility.CONFIRMADO)) {
             byte readbytes[] = new byte[4096];
             InputStream in = this.socket.getInputStream();
-            try (OutputStream file = Files.newOutputStream(Paths.get(this.filename))) {
+            try ( OutputStream file = Files.newOutputStream(Paths.get(this.filename))) {
                 for (int read = -1; (read = in.read(readbytes)) > 0;) {
                     file.write(readbytes, 0, read);
                     if (read < 4096) {
@@ -171,4 +184,3 @@ public class HiloClient {
         this.nombrelog = nombrelog;
     }
 }
-
