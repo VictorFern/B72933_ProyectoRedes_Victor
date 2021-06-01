@@ -51,6 +51,50 @@ luego de tener la libreria en el IDE le damos click derecho el el proyecto clien
 
 ![conectorli](https://user-images.githubusercontent.com/37676866/120136348-5d9d3500-c18f-11eb-9f17-0f2995627922.png)
 
+# Base de datos Mysql
+  Copie estas lineas en su Mysql Workbench
+  USE USUARIO
+
+CREATE TABLE TB_USUARIOS(
+CODIGO INT PRIMARY KEY AUTO_INCREMENT NOT NULL
+,NOMBRE VARCHAR(50) NOT NULL
+,CONTRASENA VARCHAR(50) NOT NULL
+);
+
+DELIMITER $$
+CREATE PROCEDURE sp_obtener_usuario(sp_nombre varchar(50))
+BEGIN
+     SELECT 
+     CODIGO
+     , NOMBRE 
+     ,CONTRASENA 
+     FROM TB_USUARIOS
+     WHERE NOMBRE = sp_nombre;
+END$$
+
+DELIMITER $$
+CREATE PROCEDURE sp_obtener_usuario_all(sp_nombre varchar(50), sp_contrasena varchar(50))
+BEGIN
+     SELECT 
+     CODIGO
+     , NOMBRE 
+     ,CONTRASENA 
+     FROM TB_USUARIOS
+     WHERE NOMBRE = sp_nombre and CONTRASENA = sp_contrasena;
+END$$
+
+DELIMITER $$
+CREATE PROCEDURE sp_insertar_usuario(sp_nombre varchar(50),sp_contrasena VARCHAR(50))
+BEGIN
+     INSERT INTO TB_USUARIOS(
+		NOMBRE 
+		,CONTRASENA 
+     )VALUES(
+     sp_nombre
+		,sp_contrasena
+     );
+END$$
+
 #Referencia
 
 Java to achieve large image cutting and merging - Programmer Sought. (n.d.). ProgrammerSought. Retrieved May 31, 2021, from https://programmersought.com/article/56201476748/
